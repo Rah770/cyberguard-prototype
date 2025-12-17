@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard - Gamified Cybersecurity Awareness Prototype</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; }
+        .dashboard { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .stat { text-align: center; }
+        .stat h3 { font-size: 2em; color: #4CAF50; }
+        .module, .challenge, .alert { background: #fff; padding: 20px; margin: 10px 0; border-left: 5px solid #2196F3; border-radius: 5px; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #45a049; }
+        button.danger { background: #f44336; }
+        button.danger:hover { background: #da190b; }
+        .hidden { display: none; }
+        .score { color: #4CAF50; font-weight: bold; font-size: 1.2em; }
+        .progress { background: #e0e0e0; border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { background: linear-gradient(90deg, #4CAF50, #8BC34A); height: 100%; transition: width 0.5s; }
+        footer { text-align: center; margin-top: 30px; padding: 20px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ CyberGuard</h1>
+            <p>Interactive Gamified Cybersecurity Awareness System</p>
+            <div class="score">Security Score: <span id="score">0</span> pts | Level: <span id="level">Beginner</span></div>
+        </header>
+
+        <div class="dashboard">
+            <h2>📊 Progress Dashboard</h2>
+            <div class="stats">
+                <div class="stat">
+                    <h3 id="lessons">0</h3>
+                    <p>Lessons Completed</p>
+                </div>
+                <div class="stat">
+                    <h3 id="badges">0</h3>
+                    <p>Badges Earned</p>
+                </div>
+                <div class="stat">
+                    <h3 id="streak">0</h3>
+                    <p>Day Streak</p>
+                </div>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="progress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div id="login-section">
+            <div class="module">
+                <h3>👤 User Registration</h3>
+                <p>Select your profile:</p>
+                <button onclick="setupProfile('student')">Student</button>
+                <button onclick="setupProfile('professional')">Working Professional</button>
+                <button onclick="setupProfile('senior')">Senior User</button>
+            </div>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div id="micro-lesson" class="module">
+                <h3>📚 Micro-Learning Module (2 mins)</h3>
+                <p><strong>Topic: Phishing Detection</strong></p>
+                <p>Phishing emails often contain suspicious links, urgent language, or unknown senders.</p>
+                <button onclick="startChallenge()">Start Phishing Challenge →</button>
+            </div>
+
+            <div id="challenge-section" class="challenge hidden">
+                <h3>🎯 Scenario-Based Challenge</h3>
+                <p>You received this email:</p>
+                <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #ff9800; margin: 10px 0;">
+                    <strong>From: bank-support@urgent-notice.com</strong><br>
+                    "Your account will be suspended in 24 hours! Click <a href="#" style="color: red;">here</a> to verify."
+                </div>
+                <p>What do you do?</p>
+                <button onclick="checkAnswer('click')">Click the link</button>
+                <button onclick="checkAnswer('report')">Report as spam</button>
+                <button onclick="checkAnswer('ignore')">Ignore it</button>
+                <div id="feedback"></div>
+            </div>
+
+            <div id="alert-section" class="alert hidden">
+                <h3>🚨 Contextual Security Alert</h3>
+                <p><em>"This link looks suspicious. Check the sender before clicking."</em></p>
+                <button onclick="dismissAlert()">Got it! 👍</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Low-Fidelity Prototype - Design Thinking Phase 4 [web:1][web:7]</p>
+    </footer>
+
+    <script>
+        let score = 0;
+        let lessons = 0;
+        let userType = '';
+
+        function updateDashboard() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('lessons').textContent = lessons;
+            document.getElementById('progress').style.width = Math.min((score / 100) * 100, 100) + '%';
+            
+            const levels = ['Beginner', 'Intermediate', 'Expert'];
+            const levelIndex = Math.floor(score / 50);
+            document.getElementById('level').textContent = levels[Math.min(levelIndex, 2)];
+        }
+
+        function setupProfile(type) {
+            userType = type;
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            alert(`Welcome ${type.charAt(0).toUpperCase() + type.slice(1)}! Your content is now customized.`);
+            updateDashboard();
+        }
+
+        function startChallenge() {
+            document.getElementById('micro-lesson').classList.add('hidden');
+            document.getElementById('challenge-section').classList.remove('hidden');
+        }
+
+        function checkAnswer(choice) {
+            const feedback = document.getElementById('feedback');
+            if (choice === 'report') {
+                feedback.innerHTML = '<p style="color: green;">✅ Correct! Reporting phishing is the safest action. +25 points!</p>';
+                score += 25;
+                lessons++;
+            } else if (choice === 'ignore') {
+                feedback.innerHTML = '<p style="color: orange;">⚠️ Partially correct. Better to report it. +10 points.</p>';
+                score += 10;
+                lessons++;
+            } else {
+                feedback.innerHTML = '<p style="color: red;">❌ Dangerous! Never click suspicious links. Learn more below.</p>';
+                showAlert();
+            }
+            updateDashboard();
+            setTimeout(() => {
+                document.getElementById('challenge-section').classList.add('hidden');
+                document.getElementById('micro-lesson').classList.remove('hidden');
+                feedback.innerHTML = '';
+            }, 4000);
+        }
+
+        function showAlert() {
+            setTimeout(() => {
+                document.getElementById('alert-section').classList.remove('hidden');
+            }, 2000);
+        }
+
+        function dismissAlert() {
+            document.getElementById('alert-section').classList.add('hidden');
+        }
+
+        // Simulate daily reminder
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                score += 5;
+                updateDashboard();
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
